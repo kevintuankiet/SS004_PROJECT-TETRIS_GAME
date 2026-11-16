@@ -46,7 +46,7 @@ void drawGameOver();
 void runGameLoop();
 
 // =====================================================================
-// KHU VỰC CODE CỦA THÀNH VIÊN 1 (Khởi tạo, Sinh khối, Va chạm)
+// KHU VỰC CODE CỦA HƯNG (Khởi tạo, Sinh khối, Va chạm)
 // =====================================================================
 void initBoard() {
     // TODO: Khởi tạo bảng ban đầu
@@ -74,7 +74,7 @@ bool canMove(int dx, int dy, const char shape[4][4]) {
 }
 
 // =====================================================================
-// KHU VỰC CODE CỦA THÀNH VIÊN 2 (Điều khiển: Di chuyển, Xoay, Chạm đáy)
+// KHU VỰC CODE CỦA KHANG (Điều khiển: Di chuyển, Xoay, Chạm đáy)
 // =====================================================================
 void getRotatedShape(char nextShape[4][4]) {
     // TODO: Tính hình dạng dự kiến
@@ -90,7 +90,7 @@ bool handlePlayerInput() {
 }
 
 // =====================================================================
-// KHU VỰC CODE CỦA THÀNH VIÊN 3 (Cố định khối & Xóa hàng đầy)
+// KHU VỰC CODE CỦA HUÂN (Cố định khối & Xóa hàng đầy)
 // =====================================================================
 void block2Board() {
     // TODO: Cố định khối / Vẽ khối vào bảng
@@ -126,7 +126,7 @@ void removeLine() {
 }
 
 // =====================================================================
-// KHU VỰC CODE CỦA THÀNH VIÊN 4 (Hiển thị màn hình & Chống nháy)
+// KHU VỰC CODE CỦA ĐỨC (Hiển thị màn hình & Chống nháy)
 // =====================================================================
 void gotoXY(int col, int row) {
     // TODO: Đưa con trỏ về tọa độ (col, row)
@@ -149,7 +149,7 @@ void drawGameOver() {
 }
 
 // =====================================================================
-// KHU VỰC CODE CỦA THÀNH VIÊN 5 (Game Loop & Main Flow)
+// KHU VỰC CODE CỦA KIỆT (Game Loop & Main Flow)
 // =====================================================================
 void runGameLoop() {
     // TODO: Xử lý toàn bộ luồng hàm con (Game Loop). 
