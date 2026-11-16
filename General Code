@@ -9,20 +9,20 @@ using namespace std;
 #define W 15
 
 // --- BIẾN TOÀN CỤC DÙNG CHUNG ---
-char board[H][W] = {};
-int x, y, b;
-char currentBlock[4][4];
-int score = 0;
-bool isGameOver = false;
+char board[H][W] = {};              // Mảng lưu trạng thái bảng ('#' là tường, ' ' là trống, chữ cái là khối)
+int b;                              // Chỉ số loại khối hiện tại (0 -> 6 tương ứng I, O, T, S, Z, J, L)
+int x, y;                           // Tọa độ (cột x, hàng y) góc trên-trái của khối 4x4 đang rơi
+char currentBlock[4][4];            // Ma trận 4x4 lưu hình dạng hiện tại của khối đang rơi (hỗ trợ xoay)
+bool isGameOver = false;            // Trạng thái kết thúc trò chơi
 
 const char BASE_BLOCKS[7][4][4] = {
-    {{' ','I',' ',' '}, {' ','I',' ',' '}, {' ','I',' ',' '}, {' ','I',' ',' '}},
-    {{' ',' ',' ',' '}, {' ','O','O',' '}, {' ','O','O',' '}, {' ',' ',' ',' '}},
-    {{' ',' ',' ',' '}, {' ','T',' ',' '}, {'T','T','T',' '}, {' ',' ',' ',' '}},
-    {{' ',' ',' ',' '}, {' ','S','S',' '}, {'S','S',' ',' '}, {' ',' ',' ',' '}},
-    {{' ',' ',' ',' '}, {'Z','Z',' ',' '}, {' ','Z','Z',' '}, {' ',' ',' ',' '}},
-    {{' ',' ',' ',' '}, {'J',' ',' ',' '}, {'J','J','J',' '}, {' ',' ',' ',' '}},
-    {{' ',' ',' ',' '}, {' ',' ','L',' '}, {'L','L','L',' '}, {' ',' ',' ',' '}}
+    {{' ','I',' ',' '}, {' ','I',' ',' '}, {' ','I',' ',' '}, {' ','I',' ',' '}}, // Khối I
+    {{' ',' ',' ',' '}, {' ','O','O',' '}, {' ','O','O',' '}, {' ',' ',' ',' '}}, // Khối O
+    {{' ',' ',' ',' '}, {' ','T',' ',' '}, {'T','T','T',' '}, {' ',' ',' ',' '}}, // Khối T
+    {{' ',' ',' ',' '}, {' ','S','S',' '}, {'S','S',' ',' '}, {' ',' ',' ',' '}}, // Khối S
+    {{' ',' ',' ',' '}, {'Z','Z',' ',' '}, {' ','Z','Z',' '}, {' ',' ',' ',' '}}, // Khối Z
+    {{' ',' ',' ',' '}, {'J',' ',' ',' '}, {'J','J','J',' '}, {' ',' ',' ',' '}}, // Khối J
+    {{' ',' ',' ',' '}, {' ',' ','L',' '}, {'L','L','L',' '}, {' ',' ',' ',' '}}  // Khối L
 };
 
 // --- KHAI BÁO NGUYÊN MẪU HÀM (PROTOTYPES) ---
@@ -49,15 +49,27 @@ void runGameLoop();
 // KHU VỰC CODE CỦA THÀNH VIÊN 1 (Khởi tạo, Sinh khối, Va chạm)
 // =====================================================================
 void initBoard() {
-    // TODO: Xử lý khối [Khởi tạo bảng ban đầu]
+    // TODO: Khởi tạo bảng ban đầu
+    for (int i = 0 ; i < H ; i++)
+        for (int j = 0 ; j < W ; j++)
+            if (i == 0 || i == H-1 || j ==0 || j == W-1) board[i][j] = '#';
+            else board[i][j] = ' ';
 }
 
 void spawnBlock() {
-    // TODO: Xử lý khối [Sinh khối ngẫu nhiên]
+    // TODO: Sinh khối ngẫu nhiên
 }
 
 bool canMove(int dx, int dy, const char shape[4][4]) {
-    // TODO: Xử lý các khối hình thoi <Kiểm tra vị trí xuất phát> & <Có va chạm với biên/khối khác không?>
+    // TODO: Kiểm tra vị trí xuất phát có hợp lệ không & Có va chạm với biên/khối khác không?
+    for (int i = 0; i < 4; i++ )
+        for (int j = 0; j < 4; j++ )
+            if (blocks[b][i][j] != ' ') {
+                int xt = x + j + dx;
+                int yt = y + i + dy;
+                if (xt < 1 || xt >= W-1 || yt >= H-1 ) return false;
+                if (board[yt][xt] != ' ') return false;
+            }
     return true;
 }
 
@@ -65,15 +77,15 @@ bool canMove(int dx, int dy, const char shape[4][4]) {
 // KHU VỰC CODE CỦA THÀNH VIÊN 2 (Điều khiển: Di chuyển, Xoay, Chạm đáy)
 // =====================================================================
 void getRotatedShape(char nextShape[4][4]) {
-    // TODO: Xử lý khối [Tính hình dạng dự kiến]
+    // TODO: Tính hình dạng dự kiến
 }
 
 void hardDrop() {
-    // TODO: Xử lý khối [Dịch chuyển xuống vị trí thấp nhất]
+    // TODO: Dịch chuyển xuống vị trí thấp nhất
 }
 
 bool handlePlayerInput() {
-    // TODO: Xử lý nhánh <Player có nhấn phím không?> -> <Di chuyển hay Xoay hay Chạm đáy?>
+    // TODO: Player có nhấn phím không? -> Di chuyển hay Xoay hay Chạm đáy? Cập nhật hình dạng mới, tọa độ mới.
     return false;
 }
 
@@ -81,15 +93,36 @@ bool handlePlayerInput() {
 // KHU VỰC CODE CỦA THÀNH VIÊN 3 (Cố định khối & Xóa hàng đầy)
 // =====================================================================
 void block2Board() {
-    // TODO: Xử lý khối [Cố định khối] / Vẽ khối vào bảng
+    // TODO: Cố định khối / Vẽ khối vào bảng
+    for (int i = 0; i < 4; i++ )
+        for (int j = 0; j < 4; j++ )
+            if (blocks[b][i][j] != ' ')
+                board[y+i][x+j] = blocks[b][i][j];
 }
 
 void boardDelBlock() {
     // TODO: Xóa khối tạm khỏi bảng trước khi kiểm tra va chạm
+    for (int i = 0; i < 4; i++ )
+        for (int j = 0; j < 4; j++ )
+            if (blocks[b][i][j] != ' ')
+                board[y+i][x+j] = ' ';
 }
 
 void removeLine() {
-    // TODO: Xử lý khối <Có hàng nào đầy chưa?> & [Xóa hàng đầy và dồn hàng phía trên xuống]
+    // TODO: Có hàng nào đầy chưa? & Xóa hàng đầy và dồn hàng phía trên xuống
+    int i,j;
+    for (i = H-2 ; i > 0 ; i-- ){
+        for (j = 0 ; j < W ; j++)
+            if (board[i][j] == ' ') break;
+        if (j == W){
+            for (int ii = i ; ii > 0 ; ii--)
+                for (int jj = 0; jj < W; jj++)
+                    board[ii][jj] = board[ii-1][jj];
+            i++;
+            draw();
+            _sleep(200);
+        }
+    }
 }
 
 // =====================================================================
@@ -105,6 +138,10 @@ void hideCursor() {
 
 void draw() {
     // TODO: Xử lý khối [Hiển thị màn hình] ở đầu Game Loop
+    system("cls");
+
+    for (int i = 0 ; i < H ; i++, cout<<endl)
+        for (int j = 0 ; j < W ; j++) cout<<board[i][j];
 }
 
 void drawGameOver() {
@@ -112,13 +149,14 @@ void drawGameOver() {
 }
 
 // =====================================================================
-// KHU VỰC CODE CỦA THÀNH VIÊN 5 - NHÓM TRƯỞNG (Game Loop & Main Flow)
+// KHU VỰC CODE CỦA THÀNH VIÊN 5 (Game Loop & Main Flow)
 // =====================================================================
 void runGameLoop() {
-    // TODO: Xử lý toàn bộ luồng hàm con (Game Loop) bên phải Flowchart
+    // TODO: Xử lý toàn bộ luồng hàm con (Game Loop). 
 }
 
 int main() {
-    // TODO: Xử lý toàn bộ luồng chính từ (start) đến (End) bên trái Flowchart
+    // TODO: Xử lý toàn bộ luồng chính từ (start) đến (End).
+    
     return 0;
 }
