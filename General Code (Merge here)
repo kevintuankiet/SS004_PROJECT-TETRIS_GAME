@@ -93,38 +93,64 @@ bool handlePlayerInput() {
 // KHU VỰC CODE CỦA KHANG (Cố định khối & Xóa hàng đầy)
 // =====================================================================
 void block2Board() {
-    // TODO: Cố định khối / Vẽ khối vào bảng
-    for (int i = 0; i < 4; i++ )
-        for (int j = 0; j < 4; j++ )
-            if (blocks[b][i][j] != ' ')
-                board[y+i][x+j] = blocks[b][i][j];
-}
-
-void boardDelBlock() {
-    // TODO: Xóa khối tạm khỏi bảng trước khi kiểm tra va chạm
-    for (int i = 0; i < 4; i++ )
-        for (int j = 0; j < 4; j++ )
-            if (blocks[b][i][j] != ' ')
-                board[y+i][x+j] = ' ';
-}
-
-void removeLine() {
-    // TODO: Có hàng nào đầy chưa? & Xóa hàng đầy và dồn hàng phía trên xuống
-    int i,j;
-    for (i = H-2 ; i > 0 ; i-- ){
-        for (j = 0 ; j < W ; j++)
-            if (board[i][j] == ' ') break;
-        if (j == W){
-            for (int ii = i ; ii > 0 ; ii--)
-                for (int jj = 0; jj < W; jj++)
-                    board[ii][jj] = board[ii-1][jj];
-            i++;
-            draw();
-            _sleep(200);
+    // Vẽ/cố định khối hiện tại (currentBlock) vào mảng board
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (currentBlock[i][j] != ' ') {
+                // Đảm bảo tọa độ nằm trong vùng chơi hợp lệ trước khi gán
+                if (y + i >= 1 && y + i < H - 1 && x + j >= 1 && x + j < W - 1) {
+                    board[y + i][x + j] = currentBlock[i][j];
+                }
+            }
         }
     }
 }
 
+void boardDelBlock() {
+    // Xóa khối tạm khỏi bảng trước khi cập nhật tọa độ mới hoặc kiểm tra va chạm
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (currentBlock[i][j] != ' ') {
+                if (y + i >= 1 && y + i < H - 1 && x + j >= 1 && x + j < W - 1) {
+                    board[y + i][x + j] = ' ';
+                }
+            }
+        }
+    }
+}
+
+void removeLine() {
+    // Kiểm tra từ đáy lên đỉnh vùng chơi (bỏ qua tường đáy H-1 và tường nóc 0)
+    for (int i = H - 2; i >= 1; i--) {
+        bool isFull = true;
+        
+        // Chỉ kiểm tra các cột bên trong tường trái (0) và tường phải (W-1)
+        for (int j = 1; j < W - 1; j++) {
+            if (board[i][j] == ' ') {
+                isFull = false;
+                break;
+            }
+        }
+
+        if (isFull) {
+            // Dồn các hàng phía trên xuống (chỉ dồn bên trong cột 1 -> W-2)
+            for (int ii = i; ii > 1; ii--) {
+                for (int jj = 1; jj < W - 1; jj++) {
+                    board[ii][jj] = board[ii - 1][jj];
+                }
+            }
+            
+            // Làm trống hàng trên cùng của vùng chơi (hàng 1) để không kéo tường nóc (hàng 0) xuống
+            for (int jj = 1; jj < W - 1; jj++) {
+                board[1][jj] = ' ';
+            }
+
+            i++; // Kiểm tra lại chính hàng i vừa được dồn xuống (trường hợp ăn 2-4 hàng cùng lúc)
+            draw();
+            Sleep(200);
+        }
+    }
+}
 // =====================================================================
 // KHU VỰC CODE CỦA ĐỨC (Hiển thị màn hình & Chống nháy)
 // =====================================================================
