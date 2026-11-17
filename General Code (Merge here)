@@ -74,7 +74,7 @@ bool canMove(int dx, int dy, const char shape[4][4]) {
 }
 
 // =====================================================================
-// KHU VỰC CODE CỦA KHANG (Điều khiển: Di chuyển, Xoay, Chạm đáy)
+// KHU VỰC CODE CỦA HUÂN (Điều khiển: Di chuyển, Xoay, Chạm đáy)
 // =====================================================================
 void getRotatedShape(char nextShape[4][4]) {
     // TODO: Tính hình dạng dự kiến
@@ -90,7 +90,7 @@ bool handlePlayerInput() {
 }
 
 // =====================================================================
-// KHU VỰC CODE CỦA HUÂN (Cố định khối & Xóa hàng đầy)
+// KHU VỰC CODE CỦA KHANG (Cố định khối & Xóa hàng đầy)
 // =====================================================================
 void block2Board() {
     // TODO: Cố định khối / Vẽ khối vào bảng
