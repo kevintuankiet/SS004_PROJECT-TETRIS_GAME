@@ -59,7 +59,26 @@ void initBoard() {
 
 void spawnBlock() {
     // TODO: Sinh khối ngẫu nhiên
-   
+    static bool seeded = false;
+    if (!seeded) {
+        srand(time(0));
+        seeded = true;
+    }
+
+    b = rand() % 7;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            currentBlock[i][j] = BASE_BLOCKS[b][i][j];
+        }
+    }
+    // Đặt khối ở phía trên, giữa bảng
+    x = (W - 4) / 2;
+    y = 1;
+    
+    // Kiểm tra vị trí
+    if (!canMove(0, 0, currentBlock)) {
+        isGameOver = true;
+    }
 }
 
 bool canMove(int dx, int dy, const char shape[4][4]) {
