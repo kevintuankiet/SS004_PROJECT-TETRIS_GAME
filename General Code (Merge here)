@@ -14,7 +14,8 @@ int b;                              // Chỉ số loại khối hiện tại (0 
 int x, y;                           // Tọa độ (cột x, hàng y) góc trên-trái của khối 4x4 đang rơi
 char currentBlock[4][4];            // Ma trận 4x4 lưu hình dạng hiện tại của khối đang rơi (hỗ trợ xoay)
 bool isGameOver = false;            // Trạng thái kết thúc trò chơi
-
+int score = 0; // Diem so cua nguoi choi
+int comboCount = -1;
 const char BASE_BLOCKS[7][4][4] = {
     {{' ','I',' ',' '}, {' ','I',' ',' '}, {' ','I',' ',' '}, {' ','I',' ',' '}}, // Khối I
     {{' ',' ',' ',' '}, {' ','O','O',' '}, {' ','O','O',' '}, {' ',' ',' ',' '}}, // Khối O
@@ -90,41 +91,90 @@ bool handlePlayerInput() {
 }
 
 // =====================================================================
-// KHU VỰC CODE CỦA KHANG (Cố định khối & Xóa hàng đầy)
+// KHU VUC CODE CUA KHANG (Co dinh khoi, Xoa hang day & Tinh diem Combo)
 // =====================================================================
 void block2Board() {
-    // TODO: Cố định khối / Vẽ khối vào bảng
-    for (int i = 0; i < 4; i++ )
-        for (int j = 0; j < 4; j++ )
-            if (blocks[b][i][j] != ' ')
-                board[y+i][x+j] = blocks[b][i][j];
-}
-
-void boardDelBlock() {
-    // TODO: Xóa khối tạm khỏi bảng trước khi kiểm tra va chạm
-    for (int i = 0; i < 4; i++ )
-        for (int j = 0; j < 4; j++ )
-            if (blocks[b][i][j] != ' ')
-                board[y+i][x+j] = ' ';
-}
-
-void removeLine() {
-    // TODO: Có hàng nào đầy chưa? & Xóa hàng đầy và dồn hàng phía trên xuống
-    int i,j;
-    for (i = H-2 ; i > 0 ; i-- ){
-        for (j = 0 ; j < W ; j++)
-            if (board[i][j] == ' ') break;
-        if (j == W){
-            for (int ii = i ; ii > 0 ; ii--)
-                for (int jj = 0; jj < W; jj++)
-                    board[ii][jj] = board[ii-1][jj];
-            i++;
-            draw();
-            _sleep(200);
+    // Co dinh khoi hien tai (currentBlock) vao ma tran board
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (currentBlock[i][j] != ' ') {
+                if (y + i >= 1 && y + i < H - 1 && x + j >= 1 && x + j < W - 1) {
+                    board[y + i][x + j] = currentBlock[i][j];
+                }
+            }
         }
     }
 }
 
+void boardDelBlock() {
+    // Xoa khoi tam khoi bang truoc khi cap nhat toa do moi
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (currentBlock[i][j] != ' ') {
+                if (y + i >= 1 && y + i < H - 1 && x + j >= 1 && x + j < W - 1) {
+                    board[y + i][x + j] = ' ';
+                }
+            }
+        }
+    }
+}
+
+void removeLine() {
+    int linesCleared = 0; // Dem so hang xoa duoc trong 1 luot roi
+
+    // Quet tu day len dinh vung choi (bo qua tuong day H-1 va tuong noc 0)
+    for (int i = H - 2; i >= 1; i--) {
+        bool isFull = true;
+        
+        for (int j = 1; j < W - 1; j++) {
+            if (board[i][j] == ' ') {
+                isFull = false;
+                break;
+            }
+        }
+
+        if (isFull) {
+            linesCleared++;
+
+            // Don cac hang phia tren xuong
+            for (int ii = i; ii > 1; ii--) {
+                for (int jj = 1; jj < W - 1; jj++) {
+                    board[ii][jj] = board[ii - 1][jj];
+                }
+            }
+            
+            // Lam trong hang 1 de khong keo tuong noc (hang 0) xuong
+            for (int jj = 1; jj < W - 1; jj++) {
+                board[1][jj] = ' ';
+            }
+
+            i++; // Kiem tra lai hang i vua don xuong (truong hop an nhieu hang)
+            draw();
+            Sleep(200);
+        }
+    }
+
+    // --- TINH DIEM CO BAN & HE SO NHAN COMBO ---
+    if (linesCleared > 0) {
+        // 1. Tinh diem co ban theo so hang xoa cung luc
+        int basePoints = 0;
+        if (linesCleared == 1) basePoints = 100;
+        else if (linesCleared == 2) basePoints = 300;
+        else if (linesCleared == 3) basePoints = 500;
+        else if (linesCleared >= 4) basePoints = 800;
+
+        // 2. Tang chuoi combo va tinh he so nhan (1.0x, 1.5x, 2.0x, 2.5x, toi da 3.0x)
+        comboCount++;
+        double comboMultiplier = 1.0 + (comboCount * 0.5);
+        if (comboMultiplier > 3.0) comboMultiplier = 3.0;
+
+        // Cong diem da nhan he so vao tong diem
+        score += (int)(basePoints * comboMultiplier);
+    } else {
+        // Khong an duoc hang nao -> Reset chuoi combo
+        comboCount = -1;
+    }
+}
 // =====================================================================
 // KHU VỰC CODE CỦA ĐỨC (Hiển thị màn hình & Chống nháy)
 // =====================================================================
