@@ -128,24 +128,92 @@ void removeLine() {
 // =====================================================================
 // KHU VỰC CODE CỦA ĐỨC (Hiển thị màn hình & Chống nháy)
 // =====================================================================
+
 void gotoXY(int col, int row) {
-    // TODO: Đưa con trỏ về tọa độ (col, row)
+    COORD pos = { (SHORT)col, (SHORT)row };
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
 
 void hideCursor() {
-    // TODO: Ẩn con trỏ nhấp nháy trên Console
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO info;
+    GetConsoleCursorInfo(hOut, &info);
+    info.bVisible = FALSE;               // Ẩn con trỏ
+    SetConsoleCursorInfo(hOut, &info);
+}
+
+// Màu theo loại khối (chỉ phục vụ hiển thị)
+static int getColor(char c) {
+    switch (c) {
+        case 'I': return 11; // Cyan
+        case 'O': return 14; // Vàng
+        case 'T': return 13; // Tím
+        case 'S': return 10; // Xanh lá
+        case 'Z': return 12; // Đỏ
+        case 'J': return 9;  // Xanh dương
+        case 'L': return 6;  // Cam (vàng sẫm)
+        case '#': return 8;  // Xám (tường)
+        default:  return 7;  // Trắng
+    }
 }
 
 void draw() {
-    // TODO: Xử lý khối [Hiển thị màn hình] ở đầu Game Loop
-    system("cls");
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    for (int i = 0 ; i < H ; i++, cout<<endl)
-        for (int j = 0 ; j < W ; j++) cout<<board[i][j];
+    // 1. Copy board ra frame tạm -> KHÔNG sửa board gốc (UI không được đụng logic)
+    char frame[H][W];
+    for (int i = 0; i < H; i++)
+        for (int j = 0; j < W; j++)
+            frame[i][j] = board[i][j];
+
+    // 2. Vẽ đè khối đang rơi lên frame tạm
+    if (!isGameOver) {
+        for (int i = 0; i < 4; i++)
+            for (int j = 0; j < 4; j++)
+                if (currentBlock[i][j] != ' ') {
+                    int r = y + i, c = x + j;
+                    if (r >= 0 && r < H && c >= 0 && c < W)
+                        frame[r][c] = currentBlock[i][j];
+                }
+    }
+
+    // 3. In ra màn hình: mỗi ô rộng 2 ký tự cho giống hình vuông
+    gotoXY(0, 0);   // thay system("cls") -> không bị nháy
+    for (int i = 0; i < H; i++) {
+        for (int j = 0; j < W; j++) {
+            char c = frame[i][j];
+            SetConsoleTextAttribute(hOut, getColor(c));
+            if (c == ' ')      cout << "  ";
+            else if (c == '#') cout << "##";
+            else               cout << "[]";
+        }
+        SetConsoleTextAttribute(hOut, 7);
+        cout << endl;
+    }
+
+    // 4. Hướng dẫn điều khiển
+    SetConsoleTextAttribute(hOut, 7);
+    cout << "\n A/D: Trai/Phai   W: Xoay   S: Xuong   Space: Tha nhanh   Q: Thoat   " << endl;
 }
 
 void drawGameOver() {
-    // TODO: Xử lý khối [Hiển thị] ở nhánh Game Over
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    draw();   // vẽ khung hình cuối cùng làm nền
+
+    int row = H / 2 - 2;
+    int col = 2;
+    SetConsoleTextAttribute(hOut, 12);   // Đỏ
+    gotoXY(col, row);     cout << "+--------------------+";
+    gotoXY(col, row + 1); cout << "|                    |";
+    gotoXY(col, row + 2); cout << "|     GAME  OVER     |";
+    gotoXY(col, row + 3); cout << "|                    |";
+    gotoXY(col, row + 4); cout << "+--------------------+";
+
+    SetConsoleTextAttribute(hOut, 7);
+    gotoXY(0, H + 3);
+    cout << " Nhan phim bat ky de thoat..." << endl;
+    _getch();
 }
 
 // =====================================================================
