@@ -108,101 +108,15 @@ bool canMove(int dx, int dy, const char shape[4][4]) {
 // =====================================================================
 void getRotatedShape(char nextShape[4][4]) {
     // TODO: Tính hình dạng dự kiến
-    if (b == 1)  return;
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            nextShape[j][3 - i] = currentBlock[i][j];
-    if (!canMove(0, 0, nextShape))   return;
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            currentBlock[i][j] = nextShape[i][j];
-    return;
 }
 
 void hardDrop() {
     // TODO: Dịch chuyển xuống vị trí thấp nhất
-    while (1)
-    {
-        if (!canMove(0, 1, currentBlock))
-            return;
-        ++y;
-    }
 }
 
 bool handlePlayerInput() {
     // TODO: Player có nhấn phím không? -> Di chuyển hay Xoay hay Chạm đáy? Cập nhật hình dạng mới, tọa độ mới.
-    if (!kbhit())    return false;
-    int key = getch();
-    if(key == 224 || key == -32)
-    {   
-        key = getch();
-        switch (key)
-        {
-            //move left
-            case 75:    //left arrow
-                if (canMove(-1, 0, currentBlock)) --x;
-                break;
-            //move right
-            case 77:    //right arrow
-                if (canMove(1, 0, currentBlock)) ++x;
-                break;
-            //move down
-            case 80:    //down arrow
-                if (canMove(0, 1, currentBlock)) ++y;
-                break;
-            //rotate block
-            case 72:    //up arrow
-            {
-                char nextShape[4][4];
-                getRotatedShape(nextShape);
-                break;
-            }
-            default:
-                return false;
-        }
-        return true;
-    }
-    else
-    {
-        switch(key)
-        {
-            //move left
-            case 'a':
-            case 'A':
-                if (canMove(-1, 0, currentBlock)) --x;
-                break;
-            //move right
-            case 'd':
-            case 'D':
-                if (canMove(1, 0, currentBlock)) ++x;
-                break;
-            //move down
-            case 's':
-            case 'S':
-                if (canMove(0, 1, currentBlock)) ++y;
-                break;
-            //rotate block
-            case 'w':
-            case 'W':
-            {
-                char nextShape[4][4];
-                getRotatedShape(nextShape);
-                break;
-            }
-            //hard drop
-            case 32:    //space
-                hardDrop();
-                break;
-            //exit game
-            case 'q':   
-            case 'Q':
-                isGameOver = true;
-                break;
-            default: 
-                return false;
-        }
-        return true;
-    }
+    return false;
 }
 
 // =====================================================================
