@@ -2,6 +2,7 @@
 #include <conio.h>
 #include <ctime>
 #include <windows.h>
+#include <cstdlib>
 
 using namespace std;
 
@@ -16,6 +17,8 @@ char currentBlock[4][4];            // Ma trận 4x4 lưu hình dạng hiện t�
 bool isGameOver = false;            // Trạng thái kết thúc trò chơi
 int score = 0; // Diem so cua nguoi choi
 int comboCount = -1;
+bool hardDropRequested = false;
+
 const char BASE_BLOCKS[7][4][4] = {
     {{' ','I',' ',' '}, {' ','I',' ',' '}, {' ','I',' ',' '}, {' ','I',' ',' '}}, // Khối I
     {{' ',' ',' ',' '}, {' ','O','O',' '}, {' ','O','O',' '}, {' ',' ',' ',' '}}, // Khối O
@@ -192,6 +195,7 @@ bool handlePlayerInput() {
             //hard drop
             case 32:    //space
                 hardDrop();
+                hardDropRequested = true;
                 break;
             //exit game
             case 'q':   
@@ -318,10 +322,105 @@ void drawGameOver() {
 // =====================================================================
 void runGameLoop() {
     // TODO: Xử lý toàn bộ luồng hàm con (Game Loop). 
+
+    const DWORD FALL_INTERVAL = 500; // Thời gian tự động rơi: 500ms
+
+    // Sinh khối đầu tiên
+    spawnBlock();
+
+    if (isGameOver) {
+        drawGameOver();
+        return;
+    }
+
+    // Đưa khối đầu tiên lên board để hiển thị
+    block2Board();
+    draw();
+
+    DWORD lastFallTime = GetTickCount();
+
+    // Vòng lặp chính của trò chơi
+    while (!isGameOver) {
+
+        // Bước 1: Xóa khối đang rơi khỏi board
+        boardDelBlock();
+
+        // Bước 2: Nhận thao tác người chơi
+        hardDropRequested = false;
+        handlePlayerInput();
+
+        if (isGameOver) {
+            break;
+        }
+
+        bool lockBlock = false;
+
+        // Bước 3: Kiểm tra yêu cầu Hard Drop
+        if (hardDropRequested) {
+            lockBlock = true;
+        }
+        else {
+            // Bước 4: Kiểm tra thời gian tự động rơi
+            DWORD currentTime = GetTickCount();
+
+            if (currentTime - lastFallTime >= FALL_INTERVAL) {
+
+                if (canMove(0, 1, currentBlock)) {
+                    ++y;
+                }
+                else {
+                    lockBlock = true;
+                }
+
+                lastFallTime = currentTime;
+            }
+        }
+
+        // Bước 5: Xử lý khi khối cần cố định
+        if (lockBlock) {
+
+            // Cố định khối vào board
+            block2Board();
+
+            // Xóa hàng đầy và cập nhật điểm
+            removeLine();
+
+            // Sinh khối tiếp theo
+            spawnBlock();
+
+            // Reset thời gian rơi cho khối mới
+            lastFallTime = GetTickCount();
+
+            if (isGameOver) {
+                break;
+            }
+        }
+
+        // Bước 6: Cập nhật trạng thái board
+        block2Board();
+
+        // Bước 7: Hiển thị màn hình
+        draw();
+
+        // Giảm tải CPU
+        Sleep(10);
+    }
+
+    // Khi trò chơi kết thúc
+    drawGameOver();
 }
 
 int main() {
     // TODO: Xử lý toàn bộ luồng chính từ (start) đến (End).
-    
+
+    // Khởi tạo bảng trò chơi
+    initBoard();
+
+    // Ẩn con trỏ Console
+    hideCursor();
+
+    // Bắt đầu trò chơi
+    runGameLoop();
+
     return 0;
 }
