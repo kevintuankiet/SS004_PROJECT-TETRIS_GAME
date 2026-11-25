@@ -3,7 +3,10 @@
 #include <ctime>
 #include <windows.h>
 #include <cstdlib>
-
+#include <fstream>
+#include <vector>
+#include <string>
+#include <algorithm>
 using namespace std;
 
 #define H 20
@@ -48,7 +51,13 @@ void draw();
 void drawGameOver();
 
 void runGameLoop();
+struct PlayerRecord {
+    string name;
+    int score;
+};
 
+// Prototypes cho chức năng xếp hạng của Khang
+void saveAndShowLeaderboard(int finalScore);
 // =====================================================================
 // KHU VỰC CODE CỦA HƯNG (Khởi tạo, Sinh khối, Va chạm)
 // =====================================================================
@@ -295,6 +304,63 @@ void removeLine() {
     }
 }
 // =====================================================================
+// KHU VUC CODE CUA KHANG (Co dinh khoi, Xoa hang day, Combo & Xep hang)
+// =====================================================================
+
+// ... (Giữ nguyên 3 hàm block2Board, boardDelBlock, removeLine của bạn) ...
+
+bool compareRecords(const PlayerRecord& a, const PlayerRecord& b) {
+    return a.score > b.score; // Sắp xếp điểm từ cao xuống thấp
+}
+
+void saveAndShowLeaderboard(int finalScore) {
+    vector<PlayerRecord> records;
+    const string FILENAME = "leaderboard.txt";
+
+    // 1. Đọc dữ liệu bảng xếp hạng cũ từ file (nếu file đã tồn tại)
+    ifstream inFile(FILENAME);
+    if (inFile.is_open()) {
+        PlayerRecord temp;
+        while (inFile >> temp.name >> temp.score) {
+            records.push_back(temp);
+        }
+        inFile.close();
+    }
+    while (_kbhit()) {
+        _getch();
+    }
+    // 2. Nhập tên người chơi hiện tại và thêm vào danh sách
+    string playerName;
+    cout << "\n====================================\n";
+    cout << "GAME OVER! Diem cua ban: " << finalScore << endl;
+    cout << "Nhap ten cua ban (viet lien khong dau): ";
+    cin >> playerName;
+
+    records.push_back({playerName, finalScore});
+
+    // 3. Sắp xếp giảm dần theo điểm và giữ lại Top 5
+    sort(records.begin(), records.end(), compareRecords);
+    if (records.size() > 5) {
+        records.resize(5);
+    }
+
+    // 4. Lưu danh sách Top 5 mới xuống file
+    ofstream outFile(FILENAME);
+    if (outFile.is_open()) {
+        for (const auto& rec : records) {
+            outFile << rec.name << " " << rec.score << "\n";
+        }
+        outFile.close();
+    }
+
+    // 5. Hiển thị bảng xếp hạng ra màn hình Console
+    cout << "\n--- BANG XEP HANG TOP 5 ---\n";
+    for (size_t i = 0; i < records.size(); i++) {
+        cout << i + 1 << ". " << records[i].name << " - " << records[i].score << " diem\n";
+    }
+    cout << "===========================\n";
+}
+// =====================================================================
 // KHU VỰC CODE CỦA ĐỨC (Hiển thị màn hình & Chống nháy)
 // =====================================================================
 void gotoXY(int col, int row) {
@@ -408,6 +474,7 @@ void runGameLoop() {
 
     // Khi trò chơi kết thúc
     drawGameOver();
+    saveAndShowLeaderboard(score);
 }
 
 int main() {
