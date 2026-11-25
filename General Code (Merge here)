@@ -12,6 +12,7 @@ using namespace std;
 // --- BIẾN TOÀN CỤC DÙNG CHUNG ---
 char board[H][W] = {};              // Mảng lưu trạng thái bảng ('#' là tường, ' ' là trống, chữ cái là khối)
 int b;                              // Chỉ số loại khối hiện tại (0 -> 6 tương ứng I, O, T, S, Z, J, L)
+int nextBlockIndex = -1;            // Chỉ số khối sẽ xuất hiện tiếp theo
 int x, y;                           // Tọa độ (cột x, hàng y) góc trên-trái của khối 4x4 đang rơi
 char currentBlock[4][4];            // Ma trận 4x4 lưu hình dạng hiện tại của khối đang rơi (hỗ trợ xoay)
 bool isGameOver = false;            // Trạng thái kết thúc trò chơi
@@ -33,6 +34,7 @@ const char BASE_BLOCKS[7][4][4] = {
 void initBoard();
 void spawnBlock();
 bool canMove(int dx, int dy, const char shape[4][4]);
+void drawNextBlock();
 
 void getRotatedShape(char nextShape[4][4]);
 void hardDrop();
@@ -68,8 +70,13 @@ void spawnBlock() {
         srand(time(0));
         seeded = true;
     }
-
-    b = rand() % 7;
+    
+    // Xác định khối hiện tại
+    if (nextBlockIndex == -1) 
+        b = rand() % 7;
+    else 
+        b = nextBlockIndex;
+    
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             currentBlock[i][j] = BASE_BLOCKS[b][i][j];
@@ -83,6 +90,9 @@ void spawnBlock() {
     if (!canMove(0, 0, currentBlock)) {
         isGameOver = true;
     }
+    
+    // Sinh khối tiếp theo
+    nextBlockIndex = rand() % 7;
 }
 
 bool canMove(int dx, int dy, const char shape[4][4]) {
@@ -104,6 +114,18 @@ bool canMove(int dx, int dy, const char shape[4][4]) {
             }
             
     return true;
+}
+
+void drawNextBlock() {
+    if (nextBlockIndex < 0) return;
+
+    cout << "\nNEXT BLOCK:\n";
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            cout << BASE_BLOCKS[nextBlockIndex][i][j];
+        }
+        cout << endl;
+    }
 }
 
 // =====================================================================
